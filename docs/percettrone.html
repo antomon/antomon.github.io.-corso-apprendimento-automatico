@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.552">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Antonio Montano">
+<meta name="dcterms.date" content="2024-03-25">
+<meta name="description" content="wow">
+
+<title>Corso apprendimento automatico - 2&nbsp; Percettrone</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./summary.html" rel="next">
+<link href="./basi-apprendimento-supervisionato.html" rel="prev">
+<link href="./favicon.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta property="og:title" content="Corso apprendimento automatico - 2&nbsp; Percettrone">
+<meta property="og:description" content="Corso di apprendimento automatico da zero a primo della classe">
+<meta property="og:site_name" content="Corso apprendimento automatico">
+<meta name="twitter:title" content="Corso apprendimento automatico - 2&nbsp; Percettrone">
+<meta name="twitter:description" content="Corso di apprendimento automatico da zero a primo della classe">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./basi-apprendimento-supervisionato.html">Basi dell’apprendimento supervisionato</a></li><li class="breadcrumb-item"><a href="./percettrone.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Percettrone</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Corso apprendimento automatico</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prefazione</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./introduzione.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduzione</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./apprendimento-automatico.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Apprendimento automatico</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./basi-apprendimento-supervisionato.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Basi dell'apprendimento supervisionato</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./percettrone.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Percettrone</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./summary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Summary</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#obiettivo-della-lezione" id="toc-obiettivo-della-lezione" class="nav-link active" data-scroll-target="#obiettivo-della-lezione"><span class="header-section-number">2.1</span> Obiettivo della lezione</a></li>
+  <li><a href="#prerequisiti" id="toc-prerequisiti" class="nav-link" data-scroll-target="#prerequisiti"><span class="header-section-number">2.2</span> Prerequisiti</a></li>
+  <li><a href="#introduzione" id="toc-introduzione" class="nav-link" data-scroll-target="#introduzione"><span class="header-section-number">2.3</span> Introduzione</a></li>
+  <li><a href="#descrizione-dellalgoritmo" id="toc-descrizione-dellalgoritmo" class="nav-link" data-scroll-target="#descrizione-dellalgoritmo"><span class="header-section-number">2.4</span> Descrizione dell’algoritmo</a></li>
+  <li><a href="#funzione-di-attivazione" id="toc-funzione-di-attivazione" class="nav-link" data-scroll-target="#funzione-di-attivazione"><span class="header-section-number">2.5</span> Funzione di attivazione</a></li>
+  <li><a href="#regola-di-apprendimento" id="toc-regola-di-apprendimento" class="nav-link" data-scroll-target="#regola-di-apprendimento"><span class="header-section-number">2.6</span> Regola di apprendimento</a></li>
+  <li><a href="#interpretazione-geometrica" id="toc-interpretazione-geometrica" class="nav-link" data-scroll-target="#interpretazione-geometrica"><span class="header-section-number">2.7</span> Interpretazione geometrica</a></li>
+  <li><a href="#deriva" id="toc-deriva" class="nav-link" data-scroll-target="#deriva"><span class="header-section-number">2.8</span> Deriva</a></li>
+  <li><a href="#convergenza" id="toc-convergenza" class="nav-link" data-scroll-target="#convergenza"><span class="header-section-number">2.9</span> Convergenza</a></li>
+  <li><a href="#generalizzazione" id="toc-generalizzazione" class="nav-link" data-scroll-target="#generalizzazione"><span class="header-section-number">2.10</span> Generalizzazione</a></li>
+  <li><a href="#insiemi-di-addestramento-non-separabili" id="toc-insiemi-di-addestramento-non-separabili" class="nav-link" data-scroll-target="#insiemi-di-addestramento-non-separabili"><span class="header-section-number">2.11</span> Insiemi di addestramento non separabili</a></li>
+  <li><a href="#ordine-dei-campioni-in-fase-di-addestramento" id="toc-ordine-dei-campioni-in-fase-di-addestramento" class="nav-link" data-scroll-target="#ordine-dei-campioni-in-fase-di-addestramento"><span class="header-section-number">2.12</span> Ordine dei campioni in fase di addestramento</a></li>
+  <li><a href="#oltre-la-classificazione-binaria" id="toc-oltre-la-classificazione-binaria" class="nav-link" data-scroll-target="#oltre-la-classificazione-binaria"><span class="header-section-number">2.13</span> Oltre la classificazione binaria</a>
+  <ul class="collapse">
+  <li><a href="#uno-contro-tutti" id="toc-uno-contro-tutti" class="nav-link" data-scroll-target="#uno-contro-tutti"><span class="header-section-number">2.13.1</span> Uno contro tutti</a></li>
+  <li><a href="#generalizzazione-1" id="toc-generalizzazione-1" class="nav-link" data-scroll-target="#generalizzazione-1"><span class="header-section-number">2.13.2</span> Generalizzazione</a></li>
+  <li><a href="#uno-contro-uno" id="toc-uno-contro-uno" class="nav-link" data-scroll-target="#uno-contro-uno"><span class="header-section-number">2.13.3</span> Uno contro uno</a></li>
+  <li><a href="#utilità" id="toc-utilità" class="nav-link" data-scroll-target="#utilità"><span class="header-section-number">2.13.4</span> Utilità</a></li>
+  </ul></li>
+  <li><a href="#elementi-chiave-della-lezione" id="toc-elementi-chiave-della-lezione" class="nav-link" data-scroll-target="#elementi-chiave-della-lezione"><span class="header-section-number">2.14</span> Elementi chiave della lezione</a></li>
+  <li><a href="#prossimo-passo" id="toc-prossimo-passo" class="nav-link" data-scroll-target="#prossimo-passo"><span class="header-section-number">2.15</span> Prossimo passo</a></li>
+  <li><a href="#per-approfondire" id="toc-per-approfondire" class="nav-link" data-scroll-target="#per-approfondire"><span class="header-section-number">2.16</span> Per approfondire</a>
+  <ul class="collapse">
+  <li><a href="#documenti-storici-sul-percettrone" id="toc-documenti-storici-sul-percettrone" class="nav-link" data-scroll-target="#documenti-storici-sul-percettrone"><span class="header-section-number">2.16.1</span> Documenti storici sul percettrone</a></li>
+  <li><a href="#storia-dellapprendimento-delle-macchine" id="toc-storia-dellapprendimento-delle-macchine" class="nav-link" data-scroll-target="#storia-dellapprendimento-delle-macchine"><span class="header-section-number">2.16.2</span> Storia dell’apprendimento delle macchine</a></li>
+  <li><a href="#manuali" id="toc-manuali" class="nav-link" data-scroll-target="#manuali"><span class="header-section-number">2.16.3</span> Manuali</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./basi-apprendimento-supervisionato.html">Basi dell’apprendimento supervisionato</a></li><li class="breadcrumb-item"><a href="./percettrone.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Percettrone</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Percettrone</span></h1>
+<p class="subtitle lead">Un’introduzione</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Antonio Montano </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 25, 2024</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">March 26, 2024</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="obiettivo-della-lezione" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="obiettivo-della-lezione"><span class="header-section-number">2.1</span> Obiettivo della lezione</h2>
+<ol type="1">
+<li>Studiamo un algoritmo che è una pietra miliare dell’apprendimento delle macchine e che presenta concetti come l’addestramento supervisionato, l’ingegneria delle caratteristiche e la generalizzazione, che sono del tutto generali.</li>
+<li>È semplice abbastanza perché si possa essere introdotti in uno dei problemi più importanti dell’apprendimento delle macchine, cioè quello della classificazione lineare, nel suo caso più semplice, quella binaria.</li>
+</ol>
+</section>
+<section id="prerequisiti" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="prerequisiti"><span class="header-section-number">2.2</span> Prerequisiti</h2>
+<ol type="1">
+<li>Conoscenza basilari di geometria, algebra e teoria delle funzioni di più variabili.</li>
+<li>Capacità di comprensione delle componenti principali di un algoritmo.</li>
+</ol>
+</section>
+<section id="introduzione" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="introduzione"><span class="header-section-number">2.3</span> Introduzione</h2>
+<p>Il <strong><code>percettrone</code></strong>, introdotto pubblicamente per la prima volta da Frank Rosenblatt nel 1958, ha giocato un ruolo cruciale nello sviluppo dell’apprendimento delle macchine. Nonostante sia uno dei modelli più semplici di apprendimento supervisionato, la sua introduzione ha segnato l’inizio di un’epoca di grande interesse e sviluppo nel campo delle reti neurali e dell’apprendimento automatico.<br>
+Il percettrone è, in breve, un algoritmo per l’<code>apprendimento supervisionato di classificazioni binarie</code>. In altre parole, riceve in ingresso un vettore di caratteristiche di un modello fisico e produce un singolo risultato binario. Questo risultato è determinato dalla somma pesata degli ingressi, che passa attraverso una funzione opportuna, detta di attivazione per riferimento al neurone di McCulloch-Pitts, che ha la forma a gradino per restituire un risultato binario.<br>
+La forza del percettrone risiede nella sua capacità di apprendere i pesi ottimali dai dati di addestramento, cioè dati di cui è noto perfettamente sia il vettore di ingresso che il risultato (cioè la classe binaria, dato che tali risultati possono essere solo due). L’algoritmo di apprendimento, per ogni campione di addestramento, predice la classe di risultato. Se la predizione è corretta, i pesi non vengono modificati. Se la predizione è errata, i pesi vengono aggiornati aggiungendo o sottraendo il vettore di ingresso, a seconda che la predizione sia stata troppo bassa o troppo alta.<br>
+Rosenblatt ha dimostrato che se i dati di addestramento sono linearmente separabili, allora l’algoritmo di addestramento convergerà a una soluzione che classifica correttamente tutti i campioni di addestramento, in un tempo finito. Block e Novikov hanno anche determinato un limite superiore a tale tempo. Nonostante le sue limitazioni, come l’incapacità di gestire dati che non sono linearmente separabili, l’importanza del percettrone non deve essere sottovalutata. Ha introdotto l’idea fondamentale che le macchine possono apprendere da dati, e ha gettato le basi per lo sviluppo di modelli di apprendimento automatico più sofisticati, tra cui le reti neurali multistrato e le macchine a vettori di supporto.<br>
+Infatti, prima del percettrone, i modelli di neuroni artificiali, come il modello di McCulloch-Pitts, erano statici, nel senso che i loro pesi (o le loro connessioni sinaptiche) erano fissi e non cambiavano nel tempo. Questi modelli potevano eseguire calcoli, ma non erano in grado di adattarsi o apprendere dai dati, cioè la conoscenza era ‘predefinita’ nella rete neurale. Rosenblatt ha introdotto l’idea che i pesi delle connessioni sinaptiche possano essere modificati in base all’esperienza, in modo simile a come si pensava che i neuroni biologici si adattassero e apprendessero nel cervello. Questo è stato un passo fondamentale verso la creazione di modelli di apprendimento delle macchine che potessero imparare dai dati e migliorare così le loro prestazioni nel tempo.<br>
+Rosenblatt è probabile che abbia chiamato questo algoritmo, <code>perceptron</code> per sottolineare la sua capacità di ‘percepire’ la struttura nei dati di ingresso. Infatti, la parola perceptron richiama ‘perception’, percezione, che è il processo cognitivo utilizzato per interpretare le informazioni sensoriali.</p>
+<p>The Shallow and the Deep –&gt; LIBRO</p>
+</section>
+<section id="descrizione-dellalgoritmo" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="descrizione-dellalgoritmo"><span class="header-section-number">2.4</span> Descrizione dell’algoritmo</h2>
+<p>Innanzitutto, distinguiamo tre fasi di esecuzione dell’algoritmo: 1. <code>Fase di addestramento</code>: usiamo un certo numero di coppie di ingressi e corrispondente uscita, che chiameremo, rispettivamente, caratteristiche e classe, per calcolare dei parametri dell’algoritmo, i pesi, fino a che una certa condizione di qualità globale dell’algoritmo non sia soddisfatta. 2. <code>Fase di validazione</code>: adoperando delle coppie non utilizzate in addestramento, si valuta la qualità della predizione senza modificare i parametri del’algoritmo. 3. <code>Fase di generalizzazione</code>: diamo in ingresso all’algoritmo delle caratteristiche di cui non conosciamo a priori la classe ‘vera’ e ne otteniamo una ‘predetta’.</p>
+<p>In generale, le caratteristiche presenti in ogni ingresso sono in un numero prefissato positivo, che può essere anche arbitrariamente grande, mentre l’uscita sarà sempre un valore unico scelto tra due possibilità. Se rappresentiamo ogni ingresso con <span class="math inline">\(\mathbf{x}\)</span>, la corrispondente classe ‘vera’ con <span class="math inline">\(y\)</span>, i pesi con <span class="math inline">\(\mathbf{w}\)</span> e, infine, la classe predetta con <span class="math inline">\(\bar{y}\)</span>, allora nel diagramma seguente (Figura 1) è riassunta la fase di addestramento del percettrone. {{ insert_image(target, ‘1’, image_location, ‘Percettrone-Diagramma-addestramento.png’, ‘Figura 1: Diagramma del percettrone in fase di addestramento’, ‘Diagramma del percettrone in fase di addestramento’) }}</p>
+<p>In ogni esecuzione di addestramento, forniremo in ingresso un gruppo di caratteristiche distinte prese dalla totalità degli ingressi disponibili, di cui conosciamo anche le rispettive classi. Tutte le coppie di caratteristiche e relative classi compongono l’<strong><code>insieme di addestramento</code></strong> e ogni suo elemento si chiama <strong><code>campione</code></strong>. Nel diagramma le caratteristiche entrano in un nodo dove viene calcolato il valore <span class="math inline">\(z\)</span>, ottenuto come somma pesata delle caratteristiche e usando dei pesi ricavati dall’esecuzione appena precedente. <span class="math inline">\(z\)</span> è, a sua volta, l’ingresso di un secondo nodo con la funzione <span class="math inline">\(\mathcal{H}\)</span>, detta <code>funzione di attivazione</code>, che ne assegna la classe corrispondente.<br>
+Nel caso del percettrone, la funzione di attivazione è tale che per valori non negativi la classe è <span class="math inline">\(+1\)</span>, altrimenti, per quelli negativi, è <span class="math inline">\(-1\)</span>. La funzione <span class="math inline">\(\mathcal{H}\)</span> restituisce sempre valori numerici, ma, generalmente, ad ognuno è associato, in esclusiva, un oggetto del modello fisico che ha un nome distintivo, definito come <code>etichetta</code>. Classe ed etichetta sono usati in modo intercambiabile, data la corrispondenza 1 ad 1. Il valore predetto <span class="math inline">\(\bar{y}\)</span> viene confrontato in un terzo nodo col valore reale <span class="math inline">\(y\)</span> corrispondente al vettore di caratteristiche <span class="math inline">\(\mathbf{x}\)</span>: se i due valori concidono, quindi la predizione è esatta, allora i pesi non vengono aggiornati, sennò lo sono secondo una semplice formula che prevede di sommare al valore della precedente esecuzione, il prodotto tra un valore costante <span class="math inline">\(\pm 2\eta\)</span>, positivo se il valore corretto era <span class="math inline">\(+1\)</span>, negativo in caso contrario, con <span class="math inline">\(\mathbf{x}\)</span>. Ogni esecuzione è una <code>iterazione</code> di un ciclo che prende in ingresso un nuovo campione e il valore dei pesi testé calcolato e continua fino a che non diventi vera una <code>condizione di terminazione</code>.<br>
+Ma quando terminano le iterazioni? L’addestramento terminerà quando la somma degli errori su tutti i campioni sarà nullo, oppure al disotto di un valore prefissato. Nel mentre, i campioni dell’insieme di addestramento saranno usati tutti in un gruppo di iterazioni, definito come <code>epoca</code>, il cui numero è, evidentemente, pari al numero di campioni dell’insieme di addestramento.<br>
+Al termine dell’addestramento sarà ottenuto un insieme di pesi, la cui numerosità è pari a quella delle caratteristiche, e tali valori saranno usati, senza alcuna ulteriore modifica, in tutte le esecuzioni della seguente fase di generalizzazione (Figura 2), in cui useremo il percettrone per ottenere classi a priori ignote. {{ insert_image(target, ‘2’, image_location, ‘Percettrone-Diagramma-generalizzazione.png’, ‘Figura 2: Diagramma del percettrone in fase di generalizzazione’, ‘Diagramma del percettrone in fase di generalizzazione’) }}</p>
+</section>
+<section id="funzione-di-attivazione" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="funzione-di-attivazione"><span class="header-section-number">2.5</span> Funzione di attivazione</h2>
+<p>Innanzitutto, definiamo formalmente la funzione di attivazione a gradino <span class="math inline">\(\mathcal{H}\)</span> (che è una versione modificata della <code>funzione di Heaviside</code>): <span class="math display">\[
+\mathcal{H}(z)=\begin{cases} 1, &amp; z≥θ \\ -1, &amp; z&lt;θ \end{cases}\tag*{\color{blue}{1}}
+\]</span> il cui grafico è mostrato in Figura 3. Il significato è il seguente: se il valore dell’argomento della funzione è maggiore o uguale a <span class="math inline">\(\theta\)</span>, allora essa assumerà il valore di <span class="math inline">\(+1\)</span>. Se invece l’argomento sarà minore di <span class="math inline">\(\theta\)</span>, il risultato sarà <span class="math inline">\(-1\)</span>. {{ insert_image(target, ‘3’, image_location, ‘Percettrone-Funzione-attivazione-gradino.png’, ‘Figura 3: Funzione di attivazione a gradino’, ‘Funzione di attivazione a gradino’) }}</p>
+<p>Nella definizione è presente una soglia predefinita <span class="math inline">\(\theta\)</span>, che permette di inserire un grado di libertà molto importante nell’addestramento, di cui approfondiremo nel seguito. L’argomento della funzione di attivazione è <span class="math inline">\(z=\sum_{j=1}^{n} w_j x_j\)</span>, ottenuto come somma pesata delle caratteristiche in ingresso alla iterazione, ove <span class="math inline">\(n\)</span> è il numero delle caratteristiche.<br>
+Generalmente, si preferisce una formulazione del tutto equivalente in cui <span class="math inline">\(\mathcal{H}\)</span> ha il gradino nello <span class="math inline">\(0\)</span> dell’asse delle ascisse. A tal fine, definiamo <span class="math inline">\(\bar{z}=z-θ\)</span> e riformuliamo la funzione di attivazione: <span class="math display">\[
+\mathcal{H}(\bar{z})=\begin{cases} 1, &amp; \bar{z}≥0 \\ -1, &amp; \bar{z}&lt;0 \end{cases},\ \bar{z}=\sum_{j=1}^{N} w_j x_j-θ\tag*{\color{blue}{2}}
+\]</span> e definendo <span class="math inline">\(w_0=-θ\)</span> (chiamato <strong><code>deriva</code></strong>) e <span class="math inline">\(x_0=1\)</span>, quindi rinominando <span class="math inline">\(\bar{z}\)</span> in <span class="math inline">\(z\)</span>, si ricava: <span class="math display">\[
+\mathcal{H}(z)=\begin{cases}1, &amp; z≥0 \\ -1, &amp; z&lt;0 \end{cases},\ z=\sum_{j=0}^{N} w_j x_j\tag*{\color{blue}{3}}
+\]</span> dove, sostanzialmente, abbiamo esteso la sommatoria per comprendere anche <span class="math inline">\(\theta\)</span>.<br>
+Questa definizione può essere resa in formato più compatto, introducendo i vettori <span class="math inline">\(\mathbf{w}\)</span> per i pesi e <span class="math inline">\(\mathbf{x}\)</span> per le caratteristiche: <span class="math display">\[
+\mathbf{w}=\begin{pmatrix} w_0 \\ w_1 \\ \vdots \\ w_n \end{pmatrix},\ \mathbf{x}=\begin{pmatrix} 1 \\ x_1 \\ \vdots \\ x_n \end{pmatrix}\tag*{\color{blue}{4}}
+\]</span> dove ricordiamo che le caratteristiche ‘reali’ del modello sono sempre in numero di <span class="math inline">\(n\)</span>, mentre i due vettori hanno dimensione <span class="math inline">\(n+1\)</span>. Pertanto, la funzione di attivazione può essere riscritta utilizzando il prodotto scalare tra i due vettori dei pesi e delle caratteristiche, cioè <span class="math inline">\(z=\sum_{j=0}^{N} w_j x_j=\langle\mathbf{w},\mathbf{x}\rangle\)</span>: <span class="math display">\[
+\mathcal{H}(z)=\begin{cases}1, &amp; z≥0 \\ -1, &amp; z&lt;0 \end{cases},\ z=\langle\mathbf{w},\mathbf{x}\rangle.\tag*{\color{blue}{5}}
+\]</span></p>
+</section>
+<section id="regola-di-apprendimento" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="regola-di-apprendimento"><span class="header-section-number">2.6</span> Regola di apprendimento</h2>
+<p>Nella fase di addestramento, il percettrone ‘apprende’ i pesi che saranno usati in generalizzazione, cioè l’algoritmo determina il vettore <span class="math inline">\(\mathbf{w}\)</span>, sotto la <code>supervisione</code> di un ‘insegnante’ che fornisce l’insieme di addestramento e osserva le predizioni (donde la caratteristica dell’algoritmo di <code>apprendimento supervisionato</code>).<br>
+Introduciamo alcune notazioni: l’insieme di addestramento <span class="math inline">\(\Xi\)</span> sia composto da <span class="math inline">\(N\)</span> elementi <span class="math inline">\((\mathbf{x}^i, y_i)\)</span> (i campioni), ognuno con due valori, il vettore delle <span class="math inline">\(n+1\)</span> caratteristiche reali <span class="math inline">\(\mathbf{x}^i\)</span> e la sua classe <span class="math inline">\(y^i\)</span> che può assumere solo i valori <span class="math inline">\(\pm1\)</span>: <span class="math display">\[
+(\mathbf{x}^1, y_1), \dots, (\mathbf{x}^N, y_N)\in\Xi\tag*{\color{blue}{6}}
+\]</span> con <span class="math inline">\(N\)</span> numero positivo, <span class="math inline">\(\eta\)</span> sia il <strong><code>tasso di apprendimento</code></strong> con <span class="math inline">\(0&lt;\eta≤1\)</span>, <span class="math inline">\(K\)</span> sia un numero intero positivo che identifichi l’iterazione corrente, e <span class="math inline">\(\bar{y}_K\)</span> denoti il risultato dell’algoritmo all’iterazione <span class="math inline">\(K\)</span>, cioè la classe predetta, allora i passi che il percettrone esegue nella fase di apprendimento, sono riassunti nella cosiddetta <strong><code>regola di apprendimento</code></strong>:</p>
+<blockquote class="blockquote">
+<p><strong><code>Regola di apprendimento del percettrone</code></strong> 1. Inizializza i pesi <span class="math inline">\(\mathbf{w}^0\)</span> a <span class="math inline">\(0\)</span> oppure a piccoli valori casuali, definisci un tasso di apprendimento <span class="math inline">\(\eta\)</span> e un numero massimo di iterazioni <span class="math inline">\(\bar{K}\)</span> o un numero massimo di epoche <span class="math inline">\(\bar{E}\)</span>. 2. Per ogni epoca <span class="math inline">\(E\)</span>: 1. Per ogni campione <span class="math inline">\((\mathbf{x}^\kappa, y_\kappa)\)</span> dell’insieme di addestramento (<span class="math inline">\(1≤\kappa≤N\)</span> è l’indice positivo sull’insieme di addestramento, <span class="math inline">\(E\)</span> è l’indice positivo di epoche, <span class="math inline">\(N\)</span> la dimensione dell’insieme di addestramento e <span class="math inline">\(K=EN+\kappa\)</span> il totale delle iterazioni compiute): 1. Calcola la predizione della classe corrispondente a <span class="math inline">\(\mathbf{x}^\kappa\)</span>: <span class="math display">\[
+     \bar{y}_K=\mathcal{H}\left(\sum_{j=0}^{n} w_j^{K-1} x_j^\kappa\right).\tag*{\color{blue}{7}}
+     \]</span> 2. Aggiorna i pesi <span class="math inline">\(\mathbf{w}^K\)</span> secondo la formula: <span class="math display">\[
+      \mathbf{w}^K=\mathbf{w}^{K-1}+\eta(y_\kappa-\bar{y}_K)\mathbf{x}^\kappa.\tag* {\color{blue}{8}}
+      \]</span> 2. Continua fino alla prima occorrenza di una tra le due condizioni seguenti: non vi siano più errori di predizione sull’insieme di addestramento, cioè <span class="math inline">\(y_\kappa-\bar{y}_K=0\ \forall \kappa\)</span>, cioè in una intera epoca, oppure finché non sia raggiunto il numero massimo di iterazioni <span class="math inline">\(\bar{K}\)</span> o il numero massimo di epoche <span class="math inline">\(\bar{E}\)</span> (dove <span class="math inline">\(\bar{K}=N\bar{E}\)</span>). 3. Prendi il vettore dei pesi <span class="math inline">\(\mathbf{w}\)</span> per classificare caratteristiche con etichetta ignota nella fase di generalizzazione.</p>
+</blockquote>
+<p>Il tasso di apprendimento <span class="math inline">\(\eta\)</span> e il numero massimo di iterazioni <span class="math inline">\(\bar{K}\)</span> sono detti <strong><code>iperparametri</code></strong>, dato che non sono modificati dalla regola di apprendimento, ma ricavati con tecniche aggiuntive ad hoc. Le iterazioni sono tali da applicare tutto l’insieme di addestramento un certo numero intero di volte, quindi <span class="math inline">\(\bar{K}=E\cdot N\)</span>.<br>
+Si nota che: * Se il percettrone predice correttamente la classe, allora <span class="math inline">\(y_\kappa-\bar{y}_K=0\)</span>, quindi i pesi rimangono invariati. * Se il percettrone effettua una predizione erronea, allora <span class="math display">\[
+\mathbf{w}^K-\mathbf{w}^{K-1}=\eta (y_\kappa-\bar{y}_K)\mathbf{x}^\kappa=\begin{cases}\eta (1-(-1))\mathbf{x}^\kappa=2\eta \mathbf{x}^\kappa &amp; y_\kappa=1,\ \bar{y}_K=-1 \\ \eta (-1-(1))\mathbf{x}^\kappa=-2\eta \mathbf{x}^\kappa &amp; y_\kappa=-1,\ \bar{y}_K=1 \end{cases}\tag*{\color{blue}{9}}
+\]</span> quindi per <span class="math inline">\(y_\kappa=1\)</span> i pesi si incrementano di una frazione positiva del vettore delle caratteristiche, mentre per <span class="math inline">\(y_\kappa=-1\)</span> di una frazione negativa, la cui entità dipende da <span class="math inline">\(\eta\)</span>.</p>
+</section>
+<section id="interpretazione-geometrica" class="level2" data-number="2.7">
+<h2 data-number="2.7" class="anchored" data-anchor-id="interpretazione-geometrica"><span class="header-section-number">2.7</span> Interpretazione geometrica</h2>
+<p>Possiamo interpretare la <span class="math inline">\(\color{blue}\fbox{5}\)</span>, come l’esistenza di una frontiera, per cui se un vettore delle caratteristiche è ‘sopra’ di essa, allora la classe corrispondente è <span class="math inline">\(+1\)</span> , se al disotto allora sarà <span class="math inline">\(-1\)</span>. Tale frontiera è definita da <span class="math inline">\(\langle\mathbf{w},\mathbf{x}\rangle=0\)</span> o, equivalentemente <span class="math inline">\(\sum_{j=0}^{n} w_j x_j=0\)</span>, che possiamo riscrivere, ricordando che <span class="math inline">\(x_0=1\)</span>, come <span class="math inline">\(w_0+x_1w_1+\dots+x_nw_n=0\)</span> che corrisponde ad un punto su una retta per <span class="math inline">\(n=1\)</span>, una retta nel piano per <span class="math inline">\(n=2\)</span>, un piano nello spazio tridimensionale per <span class="math inline">\(n=3\)</span> e un iperpiano in <span class="math inline">\(\mathbb{R}^n\)</span> per <span class="math inline">\(n&gt;3\)</span>.<br>
+Scegliamo <span class="math inline">\(n=2\)</span> per poter visualizzare i vettori delle caratteristiche e la frontiera. Un vettore <span class="math inline">\(\mathbf{x}\)</span>, così come definito in <span class="math inline">\(\color{blue}\fbox{4}\)</span>, lo disegniamo come un punto di coordinate <span class="math inline">\((x_1,x_2)\)</span> e la frontiera di equazione <span class="math inline">\(w_0+x_1w_1+x_2w_2=0\)</span>, come una retta. Sappiamo che, ad ogni iterazione, i tre pesi <span class="math inline">\(w_0,w_1,w_2\)</span> possono assumere dei nuovi valori e, al termine dell’addestramento, avranno quelli definitivi da usare nella fase di generalizzazione.<br>
+Nella Figura 4, tutti i punti sopra o sulla retta (sfondo rosa) sono tali che <span class="math inline">\(w_0+x_1w_1+x_2w_2≥0\)</span>, quindi hanno classe <span class="math inline">\(+1\)</span>, mentre per quelli per cui è <span class="math inline">\(w_0+x_1w_1+x_2w_2&lt;0\)</span> la classe è <span class="math inline">\(-1\)</span> (sfondo azzurro). {{ insert_image(target, ‘4’, image_location, ‘Percettrone-Frontiera-decisione.png’, ‘Figura 4: Spazio bidimensionale delle caratteristiche e frontiera di decisione’, ‘Spazio bidimensionale delle caratteristiche e frontiera di decisione’) }}</p>
+<p>Quindi, la retta <span class="math inline">\(w_0+x_1w_1+x_2w_2=0\)</span> si comporta come una vera e propria <strong><code>frontiera di decisione</code></strong>, giacché la posizione relativa del vettore delle caratteristiche rispetto alla retta, determina la classe predetta che gli corrisponde. Proprio perché la frontiera di decisione è una linea, allora il percettrone è definito come un <strong><code>classificatore lineare</code></strong>.<br>
+In pratica, l’addestramento consiste nel muovere la retta (o per un numero di caratteristiche <span class="math inline">\(n&gt;2\)</span>, un piano o un iperpiano) nello spazio bidimensionale (rispettivamente, nello spazio tridimensionale o multidimensionale), in modo da dividerlo perché tutti i punti con classe <span class="math inline">\(+1\)</span> siano sopra la frontiera e i rimanenti al disotto. Ciò non è detto sia a priori possibile, a causa della distribuzione delle caratteristiche, cioè non esista tale frontiera come nel caso della Figura 5. {{ insert_image(target, ‘5’, image_location, ‘Percettrone-Caratteristiche-non-lin-sep.png’, ‘Figura 5: Caratteristiche non linearmente separabili’, ‘Caratteristiche non linearmente separabili’) }}</p>
+<p>Ciò si esprime dicendo che l’insieme di addestramento non è <strong><code>linearmente separabile</code></strong> o, in altre parole, che il percettrone commetterà sempre degli errori di classificazione in fase di addestramento, giacché, per costruzione, può solo produrre frontiere di decisione lineari. Al contrario, in Figura 4, è mostrato un insieme di addestramento linearmente separabile con una possibile, tra le infinite, frontiera di separazione che efficacemente distingue le caratteristiche (in Figura 6 alcuni esempi di frontiere di decisione alternative). {{ insert_image(target, ‘6’, image_location, ‘Percettrone-Frontiere-multiple.png’, ‘Figura 6: Frontiere di decisione multiple’, ‘Frontiere di decisione multiple’) }}</p>
+</section>
+<section id="deriva" class="level2" data-number="2.8">
+<h2 data-number="2.8" class="anchored" data-anchor-id="deriva"><span class="header-section-number">2.8</span> Deriva</h2>
+<p>Il termine deriva è usato in matematica e in informatica per rappresentare una sorta di correzione, che viene aggiunta al risultato di un algoritmo. Nella regola di apprendimento del percettrone, si nota che senza la deriva <span class="math inline">\(w_0\)</span>, la frontiera di decisione passerebbe sempre per l’origine dello spazio delle caratteristiche e ciò ne limiterebbe evidentemente la capacità di separazione di sottoinsiemi degli insiemi di apprendimento.<br>
+Per visualizzare questa affermazione, poniamo sempre <span class="math inline">\(n=2\)</span> e facendo riferimento alla Figura 6, dove è disegnata la frontiera <span class="math inline">\(w_0+x_1w_1+x_2w_2=0\)</span> con la sua intersezione con l’asse delle ordinate <span class="math inline">\(-\frac{w_0}{w_2}\)</span> che si può esprimere anche con <span class="math inline">\(\frac{\theta}{w_2}\)</span>, ci si può convincere che per <span class="math inline">\(w_0=0\)</span> o <span class="math inline">\(\theta=0\)</span>, la frontiera passa per l’origine delle coordinate dello spazio delle caratteristiche. {{ insert_image(target, ‘7’, image_location, ‘Percettrone-Frontiera-decisione-intercetta.png’, ‘Figura 7: Frontiera di decisione e deriva’, ‘Frontiera di decisione e deriva’) }}</p>
+</section>
+<section id="convergenza" class="level2" data-number="2.9">
+<h2 data-number="2.9" class="anchored" data-anchor-id="convergenza"><span class="header-section-number">2.9</span> Convergenza</h2>
+<p>Sappiamo che una condizione necessaria perché il percettrone possa classificare correttamente l’insieme di addestramento, sia che questo abbia la proprietà di lineare separabilità. Quello che non sappiamo è se ciò sia anche sufficiente, cioè se è garantito che la regola di apprendimento produca un vettore <span class="math inline">\(\mathbf{w}\)</span> senza errori di classificazione e, quindi, sia costruita una frontiera di separazione efficace. E questa è proprio la tesi del teorema di convergenza del percettrone pubblicato per la prima volta da Rosenblatt nel 1958 ([RF58II] e [RF62]). &gt; <strong><code>Teorema di convergenza del percettrone</code></strong><br>
+&gt; &gt; Per ogni insieme di addestramento, composto da un numero finito di campioni, l’algoritmo di addestramento del percettrone produrrà un vettore <span class="math inline">\(\mathbf{w}\)</span> che classificherà correttamente tutti tali elementi, in un numero finito di epoche.</p>
+<p>Ciò si esprime anche dicendo che l’algoritmo <strong><code>converge</code></strong> e, usualmente, ciò accade in un numero di iterazioni che è di gran lunga superiore alla dimensione dell’insieme di addestramento. Se la condizione del teorema non è soddisfatta, allora l’algoritmo continuerà a fare aggiustamenti ai pesi e alla deriva, senza mai raggiungere una soluzione che classifichi correttamente tutti i campioni dell’insieme di addestramento. In questo caso, si dice che l’algoritmo non converge.<br>
+Un secondo teorema, più tecnico, dimostrato indipendentemente da Henry Block [BH62] e Aleksey Novikov [NA62], stabilisce un limite superiore al numero di errori di classificazione, il che ci permette di stimare il tempo necessario all’algoritmo per convergere nel caso di insieme di addestramento linearmente separabile.</p>
+<blockquote class="blockquote">
+<p><strong><code>Teorema del numero massimo di errori del percettrone (Block/Novikov)</code></strong></p>
+<p>Assumiamo che l’insieme di addestramento <span class="math inline">\(\Xi\)</span> sia linearmente separabile con margine <span class="math inline">\(\gamma\)</span> e che la lunghezza (o norma euclidea) di tutti i vettori delle caratteristiche, sia minore o uguale di un certo valore <span class="math inline">\(R\)</span> finito (o, più formalmente, <span class="math inline">\(\lVert\mathbf{x}^i\rVert≤R\ \forall i\)</span>, per <span class="math inline">\(R&gt;0\)</span>). Quindi, il massimo numero di errori compiuti dall’algorimo del percettrone in fase di addestramento, è limitato superiormente da <span class="math inline">\(\frac{R^2\lVert\mathbf{w}\rVert^2}{\gamma^2\rVert\widetilde{\mathbf{w}}\lVert^2}\)</span>, con <span class="math inline">\(\mathbf{w}\)</span> vettore dei pesi a convergenza e <span class="math inline">\(\widetilde{\mathbf{w}}\)</span> corrispondente vettore normale alla frontiera di separazione.</p>
+</blockquote>
+<p>Nel teorema si cita il <strong><code>margine</code></strong> che è definito come la distanza minima delle caratteristiche dalla frontiera di decisione in <span class="math inline">\(\mathbb{R}^n\)</span>.<br>
+Quindi, adesso sappiamo che il numero massimo di epoche di addestramento è limitato superiormente e se si commettesse almeno un errore per epoca (se gli errori fossero zero allora l’algoritmo avrebbe raggiunto la convergenza), allora il numero di epoche sarebbe inferiore a <span class="math inline">\(\frac{R^2\lVert\mathbf{w}\rVert^2}{\gamma^2\rVert\widetilde{\mathbf{w}}\lVert^2}\)</span>. Ciò è senz’altro confortante ma potrebbe portare ad un valore molto alto e, d’altronde, l’utilità maggiore del teorema di Block-Novikov è nel notare che il limite al numero massimo di errori che esso definisce, è indipendente da: * Numero di dimensioni dello spazio delle caratteristiche. * Dimensione dell’insieme di addestramento, cioè dal numero dei campioni. * Tasso di apprendimento fintantoché sia mantenuto costante (meno ovvio perché non citato nella tesi, ma ipotesi nella dimostrazione). * Valore del vettore di inizializzazione di <span class="math inline">\(\mathbf{w}\)</span>. * Ordine dei campioni dell’insieme di addestramento.</p>
+<p>Al contrario, è dipendente da: * ‘Difficoltà’ nella separazione, cioè avere <span class="math inline">\(\gamma\)</span> molto bassi (rispetto ai valori delle caratteristiche) incrementa il limite. * La dispersione dei campioni (che porta ad un <span class="math inline">\(R\)</span> elevato).</p>
+<p>Il teorema di Block-Novikov è interessante perché pone l’accento sull’importanza di alcune proprietà dell’insieme di addestramento rispetto ad altre, ma è, al contempo, poco utile operativamente. Infatti, per stimare il limite superiore agli errori abbiamo bisogno di fornire il margine <span class="math inline">\(\eta\)</span>, che non è noto a priori e non è un risultato dell’addestramento!<br>
+D’altronde, anche ottenendo una stima della frontiera di decisione e del margine, comunque non avremmo alcuna garanzia che siano ‘vicine’ ai valori di convergenza ottenuti dall’addestramento dell’algoritmo e, soprattutto, né che tali valori siano ottimali, cioè tali da avere il margine massimo o massimizzare una qualsiasi altra metrica di ‘qualità’, sia in addestramento che nella fase seguente di generalizzazione. In generale, il percettrone convergerà ad una delle possibili frontiere di decisione che separano i due insiemi di caratterstiche corripondenti a classi diverse (come visualizzato in Figura 6).</p>
+</section>
+<section id="generalizzazione" class="level2" data-number="2.10">
+<h2 data-number="2.10" class="anchored" data-anchor-id="generalizzazione"><span class="header-section-number">2.10</span> Generalizzazione</h2>
+<p>Dopo l’addestramento supervisionato, il percettrone è pronto per classificare ingressi di cui la classe è ignota. La fase diventa di <strong><code>generalizzazione</code></strong>, definita come la capacità di estendere la conoscenza del modello acquisita per mezzo dei campioni dell’insieme di addestramento, a nuovi ingressi di cui le relative classi sono sconosciute, coll’obiettivo di predire proprio quest’ultime, in modo corretto. Questa finalità è la ragione per cui il percettrone e tutti gli altri algoritmi di classificazione, sono sviluppati.<br>
+Possiamo definire una regola di generalizzazione, al pari di quella di apprendimento, per definire il calcolo della predizione dato un nuovo ingresso di caratteristiche.</p>
+<blockquote class="blockquote">
+<p><strong><code>Regola di generalizzazione del percettrone</code></strong> Dato un vettore di caratteristiche <span class="math inline">\(\mathbf{x}\)</span>, la predizione sarà pari a: <span class="math display">\[
+\bar{y}=\mathcal{H}\left(\sum_{j=0}^{n}w_j x_j\right).\tag*{\color{blue}{10}}
+\]</span></p>
+</blockquote>
+<p>D’altronde, la capacità del percettrone è limitata dall’essere un classificatore lineare, il che significa che può solo apprendere relazioni lineari tra le caratteristiche, quindi se la loro relazione intrinseca fosse non lineare, esso non sarebbe comunque in grado di apprenderla accuratamente e, quindi, avrebbe una scarsa capacità di generalizzazione, o, in altre parole, commetterebbe un certo numero di errori di predizione. Inoltre, anche la qualità dei dati di addestramento ha un impatto sulla capacità di generalizzazione. Se i campioni contengono errori o rumore, o se non sono rappresentativi dell’intera popolazione, il percettrone non avrà una base informativa sufficiente.<br>
+Un altro fattore che influisce sulla capacità di generalizzazione è la complessità del modello fisico, che è legata al numero di caratteristiche. Se il numero di caratteristiche è troppo grande rispetto al numero di campioni, l’algoritmo può finire per <code>sovradattarsi</code> ai dati di addestramento, il che significa che apprende perfettamente i dati di addestramento, ma mostra una efficacia limitata o, comunque, nettamente inferiore nella fase di validazione, intermedia tra addestramento e generalizzazione vera e propria. In generale, esistono diverse cause di sovradattamento, che sono meglio connotate con algoritmi più complessi, ma quello che è importante sottolineare è che il percettrone non ne è immune anche se, concettualmente, è un algoritmo molto semplice.<br>
+L’errore commesso nella fase di validazione, è denominato <strong><code>errore di generalizzazione</code></strong> e il suo calcolo si effettua prendendo un insieme di campioni di caratteristiche e relative classi, non usate in fase di addestramento, e valutando le predizioni senza che i pesi e la deriva siano ulteriormente aggiornati. Quello che si ottiene rappresenta una metrica di qualità dell’algoritmo nel suo complesso, cioè, contemporaneamente, della scelta delle caratteristiche del modello e della regola di apprendimento utilizzata, cioè dell’algoritmo.</p>
+</section>
+<section id="insiemi-di-addestramento-non-separabili" class="level2" data-number="2.11">
+<h2 data-number="2.11" class="anchored" data-anchor-id="insiemi-di-addestramento-non-separabili"><span class="header-section-number">2.11</span> Insiemi di addestramento non separabili</h2>
+<p>Se l’insieme di addestramento non è linearmente separabile allora, per sua definizione, non esiste alcuna frontiera di decisione lineare che possa dividere l’insieme in due regioni dove, in ognuna, siano presenti solo caratteristiche corrispondenti alla medesima classe. In questo caso, il percettrone non potrà convergere e, ad ogni iterazione nell’addestramento, produrrà una frontiera con un certo numero di errori associati, qualsiasi sia il numero di iterazioni eseguite. Questa è una forma di <strong><code>sottoadattamento</code></strong>, cioè il modello è troppo semplice per catturare la struttura sottostante dei dati e ciò in un modo aprioristico: è l’algoritmo utilizzato che non lo permette.<br>
+Già Marvin Minsky e Seymour Papert, in [MP69], avevano mostrato che, in caso di separabilità non lineare, il percettrone ricalcolerà continuamente lo stesso vettore di pesi, quindi entrando in un ciclo infinito. Ciò comporta la necessità di algoritmi più avanzati per classificare correttamente tali insiemi di addestramento, come le <strong><code>macchine a vettori di supporto</code></strong>, o altri metodi più avanzati del percettrone.</p>
+</section>
+<section id="ordine-dei-campioni-in-fase-di-addestramento" class="level2" data-number="2.12">
+<h2 data-number="2.12" class="anchored" data-anchor-id="ordine-dei-campioni-in-fase-di-addestramento"><span class="header-section-number">2.12</span> Ordine dei campioni in fase di addestramento</h2>
+<p>Durante l’addestramento, il percettrone aggiorna iterativamente i suoi pesi in base agli errori commessi. Questi aggiornamenti sono guidati dalla sequenza di campioni di addestramento forniti. Ecco perché l’ordine in cui questi campioni vengono presentati, può influenzare significativamente la velocità di convergenza e tecniche di modifica di tale ordine riducono significativamente le iterazioni necessarie al raggiungimento della soglia di arresto.<br>
+Rispetto alla regola di apprendimento presentata precedentemente, un solo cambiamento viene effettuato e cioè l’aggiunta di un passo nell’iterazione sulle epoche, in cui adottiamo una strategia di modifica, o anche una combinazione, dell’ordine dei campioni, che può includere anche una modifica nel numero di iterazioni nell’epoca, nel caso in cui uno o più campioni vengano omessi o presentati più volte.</p>
+<blockquote class="blockquote">
+<p><strong><code>Regola di apprendimento del percettrone con ordine dei campioni modificato</code></strong> 1. Inizializza i pesi <span class="math inline">\(\mathbf{w}^0\)</span> a <span class="math inline">\(0\)</span> oppure a piccoli valori casuali, definisci un tasso di apprendimento <span class="math inline">\(\eta\)</span> e un numero massimo di iterazioni <span class="math inline">\(\bar{K}\)</span> o un numero massimo di epoche <span class="math inline">\(\bar{E}\)</span>. 2. Per ogni epoca <span class="math inline">\(E\)</span>: 1. Modifica l’ordine dei campioni dell’insieme di addestramento 2. Per ogni campione <span class="math inline">\((\mathbf{x}^\kappa, y_\kappa)\)</span> dell’insieme di addestramento (<span class="math inline">\(1≤\kappa≤N\)</span> è l’indice positivo sull’insieme di addestramento, <span class="math inline">\(E\)</span> è l’indice positivo di epoche, <span class="math inline">\(N\)</span> la dimensione dell’insieme di addestramento e <span class="math inline">\(K=EN+\kappa\)</span> il totale delle iterazioni compiute): 1. Calcola la predizione della classe corrispondente a <span class="math inline">\(\mathbf{x}^\kappa\)</span>: <span class="math display">\[
+     \bar{y}_K=\mathcal{H}\left(\sum_{j=0}^{n} w_j^{K-1} x_j^\kappa\right).\tag*{\color{blue}{11}}
+     \]</span> 2. Aggiorna i pesi <span class="math inline">\(\mathbf{w}^K\)</span> secondo la formula: <span class="math display">\[
+      \mathbf{w}^K=\mathbf{w}^{K-1}+\eta(y_\kappa-\bar{y}_K)\mathbf{x}^\kappa.\tag* {\color{blue}{12}}
+      \]</span> 3. Continua fino alla prima occorrenza di una tra le due condizioni seguenti: non vi siano più errori di predizione sull’insieme di addestramento, cioè <span class="math inline">\(y_\kappa-\bar{y}_K=0\ \forall \kappa\)</span>, cioè in una intera epoca, oppure finché non sia raggiunto il numero massimo di iterazioni <span class="math inline">\(\bar{K}\)</span> o il numero massimo di epoche <span class="math inline">\(\bar{E}\)</span> (dove <span class="math inline">\(\bar{K}=N\bar{E}\)</span>). 3. Prendi il vettore dei pesi <span class="math inline">\(\mathbf{w}\)</span> per classificare caratteristiche con etichetta ignota nella fase di generalizzazione.</p>
+</blockquote>
+<p>Abbiamo aggiunto il passo 2.1 che a seconda delle strategie adottate verrà esploso nelle istruzioni necessarie, anche complesse. Alcune strategie: * Rimescolamento degli indici: gli indici vengono permutati con un algoritmo come quello di Fisher-Yates che garantisce una permutazione imparziale, cioè ogni possibile permutazione dell’elenco degli indici ha la stessa probabilità di occorrenza. È implementato dalla funzione <code>random.shuffle</code> in Python. Vi sono alternative più complesse. * Ciclo: in pratica ad ogni epoca si parte dall’elemento successivo a quello usato nella precedente (gli indici sono ottenuti dalla operazione <span class="math inline">\(i+1 \bmod n\)</span>, se <span class="math inline">\(i\)</span> è l’indice dell’ultima sequenza). * Massima distanza: ad ogni epoca dividiamo in due sottoinsiemi l’insieme di addestramento: quello coi campioni non correttamente classificati e il complementare. Il primo lo ordiniamo per distanza decrescente <span class="math inline">\(\frac{-y_\kappa\langle\mathbf{w}^K, \mathbf{x}^\kappa\rangle}{\lVert\widetilde{\mathbf{w}}^K\rVert}\)</span> dalla ultima frontiera di decisione (quindi il primo sarà quello ‘più’ erroneamente classificato). Il secondo sottoinsieme per distanza crescente <span class="math inline">\(\frac{y_\kappa\langle\mathbf{w}^K, \mathbf{x}^\kappa\rangle}{\lVert\widetilde{\mathbf{w}}^K\rVert}\)</span> dalla frontiera di decisione o rimescolati. L’ordine nell’epoca sarà dato dal primo sottoinsieme seguito dal secondo. * Massimo residuo: si ordinano i campioni sulla base dell’errore, in valore assoluto, commesso prima dell’applicazione della funzione di attivazione alla predizione <span class="math inline">\(|\langle\mathbf{w}^K,\mathbf{x}^\kappa\rangle-y^\kappa|\)</span>, a partire dal massimo e poi via via in modo decrescente.</p>
+<p>Da notare come le prime due strategie siano indipendenti dalle caratteristiche, dato che agiscono sui soli indici, mentre quelle di massima distanza e residuo, dipendano dai campioni. Inoltre, possono essere anche combinate come, ad esempio, la massima distanza per i campioni classificati erroneamente e il rimescolamento per quelli correttamente classificati.</p>
+</section>
+<section id="oltre-la-classificazione-binaria" class="level2" data-number="2.13">
+<h2 data-number="2.13" class="anchored" data-anchor-id="oltre-la-classificazione-binaria"><span class="header-section-number">2.13</span> Oltre la classificazione binaria</h2>
+<p>Nel caso di problemi con un numero di classi maggiore di due, possiamo usare delle tecniche di riduzione al caso binario, tra cui: * <strong><code>Uno contro tutti</code></strong>: Addestriamo tanti percettroni quante classi e ognuno sarà associato ad una classe che diventerà il ‘caso positivo’ (classe <span class="math inline">\(+1\)</span>) e tutte le altre corrisponderanno al ‘caso negativo’ (classe <span class="math inline">\(-1\)</span>). Tutti gli insiemi di addestramento risulteranno <strong><code>sbilanciati</code></strong>, se l’insieme di partenza avrà un numero di campioni per classe simile. Ciò, in generale, vedremo essere una condizione non ottimale. * <strong><code>Uno contro uno</code></strong>: per ogni coppia di classi, addestriamo un percettrone e, pertanto, in totale saranno <span class="math inline">\(\binom{\Sigma}{2}=\frac{\Sigma(\Sigma-1)}{2}\)</span>, ove <span class="math inline">\(\Sigma\)</span> è il numero delle classi. Ciò significa che il numero di percettroni aumenta col quadrato del numero di classi, ma l’addestramento di ognuno è su un numero di campioni inferiore.</p>
+<p>Identificheremo le varie alternative di riduzione al caso binario sotto il termine comune di <strong><code>percettrone multiclasse</code></strong>.</p>
+<section id="uno-contro-tutti" class="level3" data-number="2.13.1">
+<h3 data-number="2.13.1" class="anchored" data-anchor-id="uno-contro-tutti"><span class="header-section-number">2.13.1</span> Uno contro tutti</h3>
+<section id="regola-di-apprendimento-1" class="level4" data-number="2.13.1.1">
+<h4 data-number="2.13.1.1" class="anchored" data-anchor-id="regola-di-apprendimento-1"><span class="header-section-number">2.13.1.1</span> Regola di apprendimento</h4>
+<p>L’ insieme di dati di addestramento ha sempre la forma <span class="math inline">\(\color{blue}\fbox{6}\)</span> con l’unica differenza che adesso <span class="math inline">\(y_i\)</span> può assumere <span class="math inline">\(\Sigma\)</span> valori anziché due, con <span class="math inline">\(\Sigma&gt;2\)</span>. Chiameremo il percettrone che classifica la classe <span class="math inline">\(\sigma\)</span>-esima (con <span class="math inline">\(1≤\sigma≤\Sigma\)</span>) come ‘percettrone <span class="math inline">\(\sigma\)</span>’ e i suoi parametri e iperparametri avranno <span class="math inline">\(\sigma\)</span> come apice o pedice.<br>
+Definiamo le <span class="math inline">\(\Sigma\)</span> classi come <span class="math inline">\(\alpha_\sigma\)</span> e l’insieme contenente tali classi come <span class="math inline">\(A\)</span>, quindi la funzione di attivazione del percettrone <span class="math inline">\(\sigma\)</span> diventa: <span class="math display">\[
+\bar{\mathcal{h}}=\mathcal{H}(\langle\mathbf{w}_\sigma, \mathbf{x}\rangle) =
+\begin{cases}
+1 &amp; \implies \bar{y}=\alpha_\sigma, &amp; \langle\mathbf{w}_\sigma,\mathbf{x}\rangle \geq 0 \vphantom{\underset{i\neq\sigma}{\lor}},\ &amp;\alpha_{\sigma}\in A \\
+-1 &amp; \implies \bar{y}=\smash{\underset{i\neq\sigma}{\lor}}\bar{\alpha}_i, &amp;\langle\mathbf{w}_\sigma, \mathbf{x}\rangle &lt; \theta
+\end{cases}
+\tag*{\color{blue}{13}}
+\]</span> cioè se l’argomento della funzione è non negativo, allora la classe predetta <span class="math inline">\(\bar{y}\)</span> è <span class="math inline">\(\alpha_\sigma\)</span>, mentre se l’argomento è negativo, allora la predizione ci dice solo che è una delle classi diverse da <span class="math inline">\(\alpha_\sigma\)</span>, ma non quale tra le classi appartenenti all’insieme <span class="math inline">\(A\setminus\{\alpha_{\sigma}\}\)</span> di tutti gli elementi di <span class="math inline">\(A\)</span> diversi da <span class="math inline">\(\alpha_{\sigma}\)</span>.<br>
+Prima di continuare con la regola di apprendimento, facciamo un esempio con tre etichette: ‘rosso’, ‘verde’ e ‘blu’ a cui corrisponderanno le classi <span class="math inline">\(\alpha_{rosso}\)</span>, <span class="math inline">\(\alpha_{verde}\)</span> e <span class="math inline">\(\alpha_{blu}\)</span>. Quindi, avremo tre percettroni e ad esempio per il ‘rosso’:<br>
+<span class="math display">\[
+\bar{\mathcal{h}}=\mathcal{H}_{rosso}(\langle\mathbf{w}_{rosso}, \mathbf{x}\rangle)=\begin{cases} 1\ &amp;\implies \bar{y}=\alpha_{rosso}, &amp; \langle\mathbf{w}_{rosso}, \mathbf{x}\rangle≥0 \\ -1\ &amp;\implies \bar{y}\ =\alpha_{verde}\lor\alpha_{blu}, &amp; \langle\mathbf{w}_{rosso}, \mathbf{x}\rangle&lt;θ \end{cases}\tag*{\color{blue}{14}}
+\]</span> da cui si evince che il ‘percettrone rosso’ predice o la classe con etichetta rosso o quella con etichetta verde o blu. Per semplicità abbiamo sostituito alla classe l’etichetta, considerata la corrispondenza biunivoca tra di esse. Pertanto, la regola di apprendimento diviene:</p>
+<blockquote class="blockquote">
+<p><strong><code>Regola di apprendimento del percettrone multiclasse 'uno contro tutti'</code></strong> 1. Inizializza i pesi <span class="math inline">\(\mathbf{w}^0_\sigma\)</span> per ogni percettrone <span class="math inline">\(\sigma\)</span>, con <span class="math inline">\(\sigma \in \Sigma\)</span>, a <span class="math inline">\(0\)</span> oppure a piccoli valori casuali, definisci un tasso di apprendimento <span class="math inline">\(\eta\)</span> e un numero massimo di epoche <span class="math inline">\(\bar{E}\)</span> o una soglia minima di errore come somma di tutti gli errori commessi dai percettroni o definita dal massimo tra tutti i percettroni. 2. Per ogni epoca <span class="math inline">\(E\)</span>: 1. Per ogni campione <span class="math inline">\((\mathbf{x}^\kappa, y_\kappa)\)</span> dell’insieme di addestramento (<span class="math inline">\(\kappa\)</span> con <span class="math inline">\(1≤\kappa≤N\)</span> è l’indice positivo sull’insieme di addestramento <span class="math inline">\(\Xi\)</span> che ha dimensione <span class="math inline">\(N\)</span>, <span class="math inline">\(E\)</span> è l’indice positivo di epoche e <span class="math inline">\(K=EN+\kappa\)</span>, il totale delle iterazioni compiute): 1. Per ogni percettrone <span class="math inline">\(\sigma\)</span>: 1. Calcola la predizione corrispondente all’ingresso <span class="math inline">\(\mathbf{x}^\kappa\)</span>: <span class="math display">\[
+          \bar{\mathcal{h}}_K=\mathcal{H}\left(\langle\mathbf{w}^{K-1}_{\sigma},\mathbf{x}^\kappa\rangle\right)\tag*{\color{blue}{15}}
+          \]</span> 2. Ricava dalla classe ‘vera’ <span class="math inline">\(y_{\kappa}\in A\)</span> il corrispondente valore <span class="math inline">\(\mathcal{h}_{\kappa}=\pm1\)</span>, usando la corrispondenza tra <span class="math inline">\(1\)</span> e <span class="math inline">\(\alpha_{\sigma}\)</span> e <span class="math inline">\(,-1\)</span> e <span class="math inline">\({\underset{i\neq\sigma}{\lor}}\bar{\alpha}_i\)</span>: <span class="math display">\[
+          \begin{align}y_{\kappa}=\alpha_{\sigma}&amp;\implies h_{\kappa}=1\\y_{\kappa}\neq\alpha_{\sigma}&amp;\implies h_{\kappa}=-1\end{align}.\tag*{\color{blue}{16}}
+          \]</span> 3. Aggiorna i pesi <span class="math display">\[
+          \mathbf{w}^K_{\sigma}=\mathbf{w}^{K-1}_{\sigma}+\eta(\mathcal{h}_{\kappa}-\bar{\mathcal{h}}_K)\mathbf{x}^{\kappa}\tag*{\color{blue}{17}}.
+          \]</span> 2. Ripeti il passo 1 per un numero predefinito di epoche o fino a quando l’errore ad una certa iterazione non abbia raggiunto la soglia predefinita. 3. Prendi i <span class="math inline">\(\Sigma\)</span> vettori di pesi&nbsp;<span class="math inline">\(\mathbf{w}_\sigma\)</span>&nbsp;per classificare caratteristiche con etichetta ignota nella fase di generalizzazione.</p>
+</blockquote>
+<p>Ritorniamo all’esempio dell’insieme colle etichette rosso, verde e blu. Supponiamo che le corrispondenti classi siano 1, 2, 3. Supponiamo che <span class="math inline">\(y_{\kappa}=2\)</span> (etichetta verde), allora la regola di addestramento all’iterazione <span class="math inline">\(K\)</span> si traduce in: * Percettrone rosso: se <span class="math inline">\(\langle\mathbf{w}^{K-1}_{rosso},\mathbf{x}^\kappa\rangle≥0\)</span>, allora predice <span class="math inline">\(+1\)</span>, quindi rosso, cioè commette un errore. D’altronde il valore vero dell’etichetta è verde quindi <span class="math inline">\(h_K=-1\)</span> e i pesi sono effettivamente aggiornati <span class="math inline">\(\mathbf{w}^K_{rosso}=\mathbf{w}^{K-1}_{rosso}-2\eta\mathbf{x}^{\kappa}\)</span>. Se <span class="math inline">\(\langle\mathbf{w}^{K-1}_{rosso},\mathbf{x}^\kappa\rangle&lt;0\)</span> allora i pesi rimangono invariati, giacché la predizione è corretta. * Percettrone verde: se <span class="math inline">\(\langle\mathbf{w}^{K-1}_{verde},\mathbf{x}^\kappa\rangle≥0\)</span>, allora predice <span class="math inline">\(+1\)</span>, quindi verde, correttamente e i pesi non sono aggiornati. Se <span class="math inline">\(\langle\mathbf{w}^{K-1}_{verde},\mathbf{x}^\kappa\rangle&lt;0\)</span> allora predice rosso o blu, quindi commette un errore. I pesi sono da aggiornare con <span class="math inline">\(h_K=1\)</span> cioè <span class="math inline">\(\mathbf{w}^K_{verde}=\mathbf{w}^{K-1}_{verde}+2\eta\mathbf{x}^{\kappa}\)</span>. * Percettrone blu: come il rosso.</p>
+</section>
+</section>
+<section id="generalizzazione-1" class="level3" data-number="2.13.2">
+<h3 data-number="2.13.2" class="anchored" data-anchor-id="generalizzazione-1"><span class="header-section-number">2.13.2</span> Generalizzazione</h3>
+<p>Supponiamo che il percettrone multiclasse abbia terminato addestramento, adesso può essere impiegato su caratteristiche non già ‘viste’. Prima però dobbiamo definire una sorta di regola di generalizzazione che, dato un ingresso, permetta di ottenere la classe di uscita.<br>
+Se tutti i percettroni hanno raggiunto la convergenza e supponendo che la classe corrispondente al nuovo ingresso <span class="math inline">\(\mathbf{x}\)</span> sia <span class="math inline">\(\alpha_{\hat{\sigma}}\)</span>, allora il percettrone <span class="math inline">\(\hat{\sigma}\)</span> dovrebbe classificarlo con <span class="math inline">\(+1\)</span> e tutti gli altri con <span class="math inline">\(-1\)</span>: <span class="math display">\[
+\begin{align}\langle\mathbf{w}_{\sigma},\mathbf{x}\rangle&amp;≥0, \ \sigma=\hat{\sigma}\\\langle\mathbf{w}_{\sigma},\mathbf{x}\rangle&amp;&lt;0,\ \forall\sigma\neq\hat{\sigma} \end{align}\tag*{\color{blue}{18}}
+\]</span> che, in modo più compatto, si può esprimere con <span class="math display">\[
+\hat{\sigma}=\underset{1≤\sigma≤\Sigma}{\mathrm{argmax}}\left(\langle\mathbf{w}_{\sigma},\mathbf{x}\rangle\right).\tag*{\color{blue}{19}}
+\]</span> Tornando all’esempio delle etichette dei colori, supponiamo di avere un campione <span class="math inline">\((x,2)\)</span> (dove <span class="math inline">\(2\)</span> era la classe dell’etichetta verde), allora, sempre nella condizione di classificazione corretta da parte di tutti i percettroni: * Percettrone rosso: <span class="math inline">\(\langle\mathbf{w}_{rosso},\mathbf{x}\rangle&lt;0\)</span>. * Percettrone verde: <span class="math inline">\(\langle\mathbf{w}_{verde},\mathbf{x}\rangle≥0\)</span>. * Percettrone blu: <span class="math inline">\(\langle\mathbf{w}_{blu},\mathbf{x}\rangle&lt;0\)</span>.</p>
+<p>La <span class="math inline">\(\color{blue}\fbox{19}\)</span> in questo caso restituisce <span class="math inline">\(2\)</span>, cioè l’etichetta verde, dato che il massimo è tra un valore positivo (quello del percettrone verde) e due negativi, quindi il comportamento della formula è coerente con le nostre aspettative.<br>
+In generale, la <span class="math inline">\(\color{blue}\fbox{19}\)</span> è la formula utilizzata per la generalizzazione del percettrone multiclasse in versione ‘uno contro tutti’, per determinare la classe corrispondente ad un nuovo ingresso e, come abbiamo visto, nel caso ideale si comporta correttamente.<br>
+D’altronde, se uno o più percettroni non hanno raggiunto la convergenza o l’insieme di addestramento non è linearmente separabile, oppure, nella condizione ideale, comunque commettono un errore di predizione, allora non varranno più le <span class="math inline">\(\color{blue}\fbox{18}\)</span> nel senso che sia il percettrone corrispopndente alla classe ‘vera’ potrebbe fallire, o gli altri classificarlo erroneamente. In tutti questi casi, la <span class="math inline">\(\color{blue}\fbox{19}\)</span> è la scelta più ragionevole perché sfrutta il massimo della conoscenza acquisita dal percettrone multiclasse.<br>
+Va però notato che non tutte le regioni dello spazio delle caratteristiche portano alla definizione di una unica classe come risultato.</p>
+</section>
+<section id="uno-contro-uno" class="level3" data-number="2.13.3">
+<h3 data-number="2.13.3" class="anchored" data-anchor-id="uno-contro-uno"><span class="header-section-number">2.13.3</span> Uno contro uno</h3>
+<section id="regola-di-apprendimento-2" class="level4" data-number="2.13.3.1">
+<h4 data-number="2.13.3.1" class="anchored" data-anchor-id="regola-di-apprendimento-2"><span class="header-section-number">2.13.3.1</span> Regola di apprendimento</h4>
+<p>In questo caso addestreremo un percettrone per ogni coppia di classi distinte <span class="math inline">\(\upsilon\)</span> e <span class="math inline">\(\tau\)</span> tra le <span class="math inline">\(\Sigma\)</span>, e lo chiameremo percettrone <span class="math inline">\(\upsilon\tau\)</span>.</p>
+<blockquote class="blockquote">
+<p><strong><code>Regola di apprendimento del percettrone multiclasse 'uno contro uno'</code></strong> 1. Per ogni percettrone <span class="math inline">\(\upsilon\tau\)</span>, seleziona dall’insieme di addestramento <span class="math inline">\(\Xi\)</span> solo i campioni che hanno <span class="math inline">\(\upsilon\)</span> e <span class="math inline">\(\tau\)</span> come classi e tale sottoinsieme sia <span class="math inline">\(\Xi_{\upsilon\tau}\)</span> e il campione generico <span class="math inline">\((\mathbf{x}_{\upsilon\tau},y_{\upsilon\tau})\)</span>. 2. Inizializza i pesi <span class="math inline">\(\mathbf{w}^0_{\upsilon\tau}\)</span>, per ogni percettrone <span class="math inline">\(\upsilon\tau\)</span>, a <span class="math inline">\(0\)</span> oppure a piccoli valori casuali, definisci un tasso di apprendimento <span class="math inline">\(\eta\)</span> e un numero massimo di epoche <span class="math inline">\(\bar{E}\)</span> o una soglia minima di errore come somma di tutti gli errori commessi dai percettroni o definita dal massimo tra tutti i percettroni. 3. Per ogni epoca <span class="math inline">\(E\)</span>: 1. Per ogni percettrone <span class="math inline">\(\upsilon\tau\)</span>: 1. Per ogni campione <span class="math inline">\((\mathbf{x}^\kappa_{\upsilon\tau}, y_{\upsilon\tau,\kappa})\)</span> dell’insieme di addestramento (<span class="math inline">\(\kappa\)</span> con <span class="math inline">\(1≤\kappa≤N_{\upsilon\tau}\)</span> è l’indice positivo sull’insieme di addestramento <span class="math inline">\(\Xi_{\upsilon\tau}\)</span> , <span class="math inline">\(E\)</span> è l’indice positivo di epoche, <span class="math inline">\(N_{\upsilon\tau}\)</span> la dimensione dell’insieme di addestramento e <span class="math inline">\(K=EN_{\upsilon\tau}+\kappa\)</span> il totale delle iterazioni compiute): 2. Calcola la predizione della classe corrispondente a <span class="math inline">\(\mathbf{x}^\kappa_{\upsilon\tau}\)</span>: <span class="math display">\[
+          \bar{y}_{\upsilon\tau,K}=\mathcal{H}\left(\sum_{j=0}^{n} w_{\upsilon\tau,j}^{K-1} x_{\upsilon\tau,j}^\kappa\right).\tag*{\color{blue}{20}}
+          \]</span> 3. Aggiorna i pesi <span class="math inline">\(\mathbf{w}^K_{\upsilon\tau}\)</span> secondo la formula: <span class="math display">\[
+          \mathbf{w}^K_{\upsilon\tau}=\mathbf{w}^{K-1}_{\upsilon\tau}+\eta(y_{\upsilon\tau,\kappa}-\bar{y}_{\upsilon\tau,K})\mathbf{x}^\kappa_{\upsilon\tau}.\tag* {\color{blue}{21}}
+          \]</span> 2. Ripeti il passo 1 per un numero predefinito di epoche o fino a quando l’errore ad una certa iterazione non abbia raggiunto la soglia predefinita. 4. Prendi i <span class="math inline">\(\binom{\Sigma}{2}\)</span> vettori di pesi&nbsp;<span class="math inline">\(\mathbf{w}_{\upsilon\tau}\)</span>&nbsp;per classificare caratteristiche con etichetta ignota nella fase di generalizzazione.</p>
+</blockquote>
+</section>
+<section id="generalizzazione-2" class="level4" data-number="2.13.3.2">
+<h4 data-number="2.13.3.2" class="anchored" data-anchor-id="generalizzazione-2"><span class="header-section-number">2.13.3.2</span> Generalizzazione</h4>
+<p>La formula di generalizzazione conta i ‘voti’ dei percettroni binari e la classe con più voti, è quella risultante della classificazione. In particolare, per ogni percettrone <span class="math inline">\(\upsilon\tau\)</span>, si calcola la predizione <span class="math inline">\(\bar{y}_{\upsilon\tau}\)</span> e si assegna un voto alla classe che corrisponde al risultato (quindi 1 voto a <span class="math inline">\(\upsilon\)</span> o <span class="math inline">\(\tau\)</span>), e così si ottiene elenco di classi con relativo totale di voti di cui prendere il massimo.<br>
+Per quanto sia semplice, tale procedura porta a delle ambiguità, perché nel caso due o più classi ottengano lo stesso numero di voti, sarà necessario un ulteriore criterio per ridurre tale molteplicità ad una.</p>
+</section>
+</section>
+<section id="utilità" class="level3" data-number="2.13.4">
+<h3 data-number="2.13.4" class="anchored" data-anchor-id="utilità"><span class="header-section-number">2.13.4</span> Utilità</h3>
+<p>Il percettrone multiclasse è stato presentato al fine di mostrare alcune possibili estensioni del binario, ma le limitazioni di quest’ultimo appaiono come amplificate e tali da rendere la versione multiclasse poco interessante, rispetto ad alternative come le macchine a vettori di supporto, gli alberi di decisione o anche le reti neurali profonde, per citare solo alcuni tra gli strumenti di classificazione più potenti.<br>
+Inoltre, gli algoritmi di apprendimento o di predizione non aggiungono granché su un piano strettamente didattico, per questo rimandiamo ad una trattazione più completa nelle prossime lezioni.</p>
+</section>
+</section>
+<section id="elementi-chiave-della-lezione" class="level2" data-number="2.14">
+<h2 data-number="2.14" class="anchored" data-anchor-id="elementi-chiave-della-lezione"><span class="header-section-number">2.14</span> Elementi chiave della lezione</h2>
+<ol type="1">
+<li>Abbiamo introdotto alcuni concetti importanti dell’apprendimento delle macchine e cioè i classificatori lineari, l’apprendimento supervisionato, la regola e l’insieme di apprendimento, la generalizzazione e il suo errore, la deriva, la funzione di attivazione. Essendo concetti generali è importante che siano compresi profondamente, sfruttando la semplicità dell’algoritmo del percettrone.</li>
+<li>Altri concetti, ugualmente importanti come la frontiera di decisione e il margine appartenenti al novero dei classificatori, saranno ugualmente ripresi, anche se con un corredo di nozioni più articolato.</li>
+<li>Abbiamo formulato l’algoritmo del percettrone in un modo che possa essere implementato in un linguaggio di programmazione arbitario.</li>
+</ol>
+</section>
+<section id="prossimo-passo" class="level2" data-number="2.15">
+<h2 data-number="2.15" class="anchored" data-anchor-id="prossimo-passo"><span class="header-section-number">2.15</span> Prossimo passo</h2>
+<p>Percettrone - Implementazione Python Percettrone - Temi Avanzati Macchine a vettori di supporto</p>
+</section>
+<section id="per-approfondire" class="level2" data-number="2.16">
+<h2 data-number="2.16" class="anchored" data-anchor-id="per-approfondire"><span class="header-section-number">2.16</span> Per approfondire</h2>
+<section id="documenti-storici-sul-percettrone" class="level3" data-number="2.16.1">
+<h3 data-number="2.16.1" class="anchored" data-anchor-id="documenti-storici-sul-percettrone"><span class="header-section-number">2.16.1</span> Documenti storici sul percettrone</h3>
+<p>Il progetto PARA fu lanciato da Rosenblatt al Cornell Aeronautical Laboratory nel 1956 col duplice obiettivo: dimostrare la fattibilità di una nuova tecnica statistica e testare la ‘funzionalità’ di quella tecnica su hardware ad hoc, come il MARK I. In particolare, mirava a stabilire la fattibilità tecnica ed economica di un ‘analogo del cervello’, in grado di riconoscere strutture simili di informazioni ottiche, elettriche o sonore. Negli anni 1956-1962 approfondirà in diversi report, pubblicazioni e libri il contesto teorico del percettrone, generando anche significative aspettative.<br>
+Il percettrone, così come presentato da Rosenblatt e da altri autori, è piuttosto diverso da quello formalizzato sopra, perché le generalizzazioni teoriche seguenti hanno ‘depurato’ le supposte analogie con il cervello umano, con un formalismo che permette la focalizzazione sulle proprietà matematiche di algoritmi simulabili su macchine enormemente più potenti rispetto a quelle degli anni ’50 e ’60. Inoltre, Rosenblatt intendeva il percettrone come una macchina che completò nel 1960 e chiamò Mark I, anche se usò l’IBM 704 per effettuare una simulazione informatica e mostrare le potenzialità dell’algoritmo ([CM21]).</p>
+<p>[RF58I] Rosenblatt, Frank (1957).&nbsp;<code>The Perceptron — A Perceiving and Recognizing Automaton (Project PARA)</code>. Tech. Rep.&nbsp;85-460-1. Cornell Aeronautical Laboratory. <em>La prima pubblicazione con il termine percettrone e gli obiettivi di ricerca di Rosenblatt.</em> &gt; <em>Recent theoretical studies by this writer indicate that it should be feasible to construct an electronic or electromechanical system which will learn to recognize similarities or identities between patterns of optical, electrical, or tonal information, in a manner which may be closely analogous to the perceptual processes of a biological brain. The proposed system depends on probabilistic rather than deterministic principles for its operation, and gains its reliability from the properties of statistical measurements obtained from large populations of elements. A system which operates according to these principles will be called a&nbsp;<strong>perceptron</strong>. (Pag. 2)</em> &gt; &gt; <em>Recenti studi teorici di questo autore indicano che dovrebbe essere fattibile costruire un sistema elettronico o elettromeccanico che imparerà a riconoscere somiglianze o identità tra modelli di informazioni ottiche, elettriche o sonore, in un modo che può essere strettamente analogo ai processi percettivi di un cervello biologico. Il sistema proposto si basa su principi probabilistici piuttosto che deterministici per il suo funzionamento, e guadagna la sua affidabilità dalle proprietà delle misure statistiche ottenute da grandi popolazioni di elementi. Un sistema che opera secondo questi principi sarà chiamato perceptron. (Pag. 2)</em></p>
+<p>[RF58I] Rosenblatt, Frank (1958).&nbsp;<code>The perceptron: A theory of statistical separability in cognitive systems (Project PARA)</code>. U.S. Dept. of Commerce, Office of Technical Services.</p>
+<p>[RF58II] Rosenblatt, Frank (1958). <code>The perceptron: A probabilistic model for information storage and organization in the brain</code>. Psychological Review.&nbsp;65&nbsp;(6): 386–408.&nbsp;DOI:<a href="https://doi.org/10.1037%2Fh0042519">10.1037/h0042519</a>.</p>
+<p>[RF58III] Rosenblatt, Frank (1958). <code>Two theorems of statistical separability in the perceptron (Project PARA)</code>.&nbsp;Cornell Aeronautical Laboratory, Inc.</p>
+<p>[RF62] Rosenblatt, Frank (1962).&nbsp;<code>Principles of neurodynamics: perceptrons and the theory of brain mechanisms</code>.&nbsp;Spartan Books.</p>
+<p>[BH62] Block, Henry (1962). <code>The Perceptron: A Model for Brain Functioning. I</code>. Reviews of Modern Physics. 34, 123-135. DOI: <a href="https://doi.org/10.1103/RevModPhys.34.123">10.1103/RevModPhys.34.123</a>.</p>
+<p>[NA62] Novikov, Albert B. J. (1962). <code>On convergence proofs on perceptrons</code>. Proceedings of the Symposium on the Mathematical Theory of Automata. Vol. XII: 615–622.</p>
+<p>[MP69] Minsky, Marvin &amp; Papert, Seymour (1969). <code>Perceptrons: An Introduction to Computational Geometry</code>. MIT Press. ISBN: 0-262-63022-2/978-0-262-63022-1.</p>
+<p>[MP17] Minsky, Marvin &amp; Papert, Seymour (2017). <code>Perceptrons: An Introduction to Computational Geometry. Reissue of the 1988 Expanded Edition with a new foreword by Léon Bottou</code>. MIT Press. ISBN: 0-262-53477-0/978-0-262-53477-2.</p>
+</section>
+<section id="storia-dellapprendimento-delle-macchine" class="level3" data-number="2.16.2">
+<h3 data-number="2.16.2" class="anchored" data-anchor-id="storia-dellapprendimento-delle-macchine"><span class="header-section-number">2.16.2</span> Storia dell’apprendimento delle macchine</h3>
+<p>[NN09] Nilsson, Nils J. (2009).&nbsp;<code>The Quest for Artificial Intelligence</code>. Cambridge University Press. ISBN: 9780511819346. DOI: <a href="https://doi.org/10.1017/CBO9780511819346">10.1017/CBO9780511819346</a>. <a href="https://ai.stanford.edu/~nilsson/QAI/qai.pdf">PDF</a></p>
+<p>[CM21] Metz, Cade (2021). <code>Genius Makers:&nbsp;The Mavericks who Brought AI to Google, Facebook and the World</code>. Dutton. ISBN: 9781847942135. <em>Ed. It</em>. (2022). <code>Costruire l'intelligenza. Google, Facebook, Musk e la sfida del futuro</code>. Mondadori. ISBN: 9788804745839.</p>
+</section>
+<section id="manuali" class="level3" data-number="2.16.3">
+<h3 data-number="2.16.3" class="anchored" data-anchor-id="manuali"><span class="header-section-number">2.16.3</span> Manuali</h3>
+<p>[AS23] Axler, Sheldon (2023). <code>Linear Algebra Done Right</code>. Springer. DOI: <a href="https://doi.org/10.1007/978-3-031-41026-0">10.1007/978-3-031-41026-0</a>. ISBN: 978-3-031-41025-3. <a href="https://link.springer.com/content/pdf/10.1007/978-3-031-41026-0.pdf">PDF</a></p>
+<p>[MR22] Hardt, Moritz &amp; Recht, Benjamin (2022). <code>Patterns, Predictions, and Actions: Foundations of Machine Learning</code>. Princeton University Press. ISBN: 9780691233734. <a href="https://mlstory.org/pdf/patterns.pdf">PDF</a></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/antomon\.github\.io\/corso-apprendimento-automatico\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./basi-apprendimento-supervisionato.html" class="pagination-link" aria-label="Basi dell'apprendimento supervisionato">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Basi dell’apprendimento supervisionato</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./summary.html" class="pagination-link" aria-label="Summary">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Summary</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
