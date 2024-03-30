@@ -6,6 +6,13 @@ book:
   title: "Corso apprendimento automatico"
   author: "Antonio Montano"
   date: "3/30/2024"
+  favicon: favicon.png
+  site-url: https://antomon.github.io
+  description: "Corso di apprendimento automatico da zero a primo della classe"
+  open-graph: true
+  twitter-card: true
+  reader-mode: true
+  back-to-top-navigation: true
   page-navigation: true
   chapters:
     - index.qmd
