@@ -1,9 +1,10 @@
 project:
   type: book
+  output-dir: docs
 
 book:
   title: "corso-apprendimento-automatico"
-  author: "Norah Jones"
+  author: "Antonio Montano"
   date: "3/30/2024"
   chapters:
     - index.qmd
