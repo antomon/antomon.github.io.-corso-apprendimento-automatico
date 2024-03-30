@@ -7,7 +7,7 @@ book:
   author: "Antonio Montano"
   date: "3/30/2024"
   favicon: favicon.png
-  site-url: https://antomon.github.io
+  site-url: https://antomon.github.io/corso-apprendimento-automatico/
   description: "Corso di apprendimento automatico da zero a primo della classe"
   open-graph: true
   twitter-card: true
