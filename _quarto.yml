@@ -11,12 +11,10 @@ book:
   description: "Corso di apprendimento automatico da zero a primo della classe"
   open-graph: true
   twitter-card: true
-  reader-mode: true
   back-to-top-navigation: true
   page-navigation: true
   chapters:
     - index.qmd
-    - preface.qmd
     - part: 1.qmd
       chapters: 
         - 1.1.qmd

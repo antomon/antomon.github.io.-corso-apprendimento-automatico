@@ -1,0 +1,17 @@
+---
+title: "Tipi di apprendimento"
+subtitle: "Un'introduzione"
+format:
+  html:
+    toc: true
+    toc-expand: 3
+description: "wow"
+author: "Antonio Montano"
+date: "2024-03-25"
+date-modified: "2024-03-26"
+categories: [machine learning, generative ai, "&#127470;&#127481;"]
+image: ""
+---
+
+# 1
+
