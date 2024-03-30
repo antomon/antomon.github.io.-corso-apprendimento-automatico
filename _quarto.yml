@@ -6,9 +6,16 @@ book:
   title: "Corso apprendimento automatico"
   author: "Antonio Montano"
   date: "3/30/2024"
+  page-navigation: true
   chapters:
     - index.qmd
-    - intro.qmd
+    - preface.qmd
+    - part: 1.qmd
+      chapters: 
+        - 1.1.qmd
+    - part: 2.qmd
+      chapters:
+        - 2.1.qmd
     - summary.qmd
     - references.qmd
 
